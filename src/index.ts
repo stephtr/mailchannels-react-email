@@ -90,13 +90,13 @@ export async function sendEmail(options: EmailOptions) {
             ],
             content: [
                 {
-                    type: 'text/plain',
+                    type: 'text/plain; charset="utf-8"',
                     value: options.text,
                 },
                 ...(options.html
                     ? [
                         {
-                            type: 'text/html',
+                            type: 'text/html; charset="utf-8"',
                             value: options.html,
                         },
                     ]
