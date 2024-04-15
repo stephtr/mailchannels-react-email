@@ -33,7 +33,7 @@
 		"@react-email/render": "^0"
 	},
 	"devDependencies": {
-		"@react-email/render": "0.0.12",
+		"@react-email/render": "^0.0.12",
 		"@types/node": "^20.12.7",
 		"@types/react": "^18.2.78",
 		"typescript": "^5.4.5"
