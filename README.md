@@ -76,8 +76,15 @@ type EmailOptions = {
     selector: string;
     privateKey: string;
   };
+  attachments?: Array<Attachment>;
 };
 
 type MailContact = string | { name?: string; email: string };
 type MailContacts = MailContact | Array<MailContact>;
+
+type Attachment = {
+  contentType: string;
+  filename: string;
+  content: Buffer | ArrayBuffer | string; // base64 encoded string
+};
 ```

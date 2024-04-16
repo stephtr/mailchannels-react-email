@@ -6,6 +6,12 @@ export type MailContact =
     | string;
 export type MailContacts = MailContact | Array<MailContact>;
 
+export type Attachment = {
+    contentType: string;
+    filename: string;
+    content: Buffer | ArrayBuffer | string;
+};
+
 export type EmailOptions = {
     subject: string;
     text: string;
@@ -20,6 +26,7 @@ export type EmailOptions = {
         selector: string;
         privateKey: string;
     };
+    attachments?: Array<Attachment>;
 }
 
 function mailContactToType(contact: MailContact): {
@@ -48,6 +55,18 @@ function sendDevMail(options: EmailOptions) {
         .join(', ');
     // eslint-disable-next-line no-console
     console.log(`\n📧 to ${toContact}: ${subject}\n${options.text}\n`);
+}
+
+function escapeFileName(filename: string) {
+    // Encode URI components to handle non-ASCII and special characters
+    let encodedFilename = encodeURIComponent(filename);
+
+    // Replace any characters that encodeURIComponent does not escape
+    encodedFilename = encodedFilename.replace(/['()*]/g, function (c) {
+        return '%' + c.charCodeAt(0).toString(16);
+    });
+
+    return encodedFilename;
 }
 
 export async function sendEmail(options: EmailOptions) {
@@ -101,6 +120,10 @@ export async function sendEmail(options: EmailOptions) {
                         },
                     ]
                     : []),
+                ...(options.attachments?.map(a => ({
+                    type: `${a.contentType.replace(/[^a-z\/]/g, '')}\nContent-Transfer-Encoding: base64\nContent-Disposition: attachment; filename="${escapeFileName(a.filename)}"`,
+                    value: typeof a.content === 'string' ? a.content : Buffer.from(a.content).toString('base64'),
+                })) ?? []),
             ],
         }),
     });
