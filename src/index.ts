@@ -57,18 +57,6 @@ function sendDevMail(options: EmailOptions) {
     console.log(`\n📧 to ${toContact}: ${subject}\n${options.text}\n`);
 }
 
-function escapeFileName(filename: string) {
-    // Encode URI components to handle non-ASCII and special characters
-    let encodedFilename = encodeURIComponent(filename);
-
-    // Replace any characters that encodeURIComponent does not escape
-    encodedFilename = encodedFilename.replace(/['()*]/g, function (c) {
-        return '%' + c.charCodeAt(0).toString(16);
-    });
-
-    return encodedFilename;
-}
-
 export async function sendEmail(options: EmailOptions) {
     if (process.env.NODE_ENV === 'development') {
         return sendDevMail(options);
@@ -121,8 +109,14 @@ export async function sendEmail(options: EmailOptions) {
                     ]
                     : []),
                 ...(options.attachments?.map(a => ({
-                    type: `${a.contentType.replace(/[^a-z\/]/g, '')}\nContent-Transfer-Encoding: base64\nContent-Disposition: attachment; filename="${escapeFileName(a.filename)}"`,
-                    value: typeof a.content === 'string' ? a.content : Buffer.from(a.content).toString('base64'),
+                    type:
+                        `${a.contentType.replace(/[^a-z\/]/g, '')}\n` +
+                        `Content-Transfer-Encoding: base64\n` +
+                        `Content-Disposition: attachment; filename="${a.filename.replace(/([\\"])/g, '\\$1')}"`,
+                    value:
+                        typeof a.content === 'string' ?
+                            a.content :
+                            Buffer.from(a.content).toString('base64'),
                 })) ?? []),
             ],
         }),
